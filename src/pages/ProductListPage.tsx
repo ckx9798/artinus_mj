@@ -5,6 +5,8 @@ import { getProducts } from "../features/product/api";
 import { toast } from "react-toastify";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
+const PREFETCH_THRESHOLD = 5;
+
 const ProductListPage = () => {
   const {
     data,
@@ -48,7 +50,7 @@ const ProductListPage = () => {
         observer.unobserve(currentTarget);
       }
     };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, data]);
 
   useEffect(() => {
     if (status === "error") {
@@ -79,6 +81,8 @@ const ProductListPage = () => {
     );
   }
 
+  const allProducts = data.pages.flatMap((page) => page.products);
+
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="sticky top-0 border-b border-neutral-200 bg-white/80 backdrop-blur-md">
@@ -90,18 +94,21 @@ const ProductListPage = () => {
       <main>
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {data.pages
-              .flatMap((page) => page.products)
-              .map((product) => (
+            {allProducts.map((product, index) => {
+              const isPrefetchTarget =
+                allProducts.length - PREFETCH_THRESHOLD === index;
+
+              return (
                 <div
                   key={product.id}
+                  ref={isPrefetchTarget ? observerTargetRef : null}
                   className="group cursor-pointer rounded-lg border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg"
                 >
-                  <div className="relative overflow-hidden rounded-t-lg">
+                  <div className="relative flex justify-center overflow-hidden rounded-t-lg">
                     <img
                       src={product.thumbnail}
                       alt={product.title}
-                      className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="aspect-video h-[300px] w-[300px] object-cover p-8 transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute right-3 top-3 rounded-full bg-secondary px-2 py-1 text-xs font-semibold text-secondary-900">
                       {product.discountPercentage}% OFF
@@ -136,10 +143,9 @@ const ProductListPage = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
           </div>
-
-          <div ref={observerTargetRef} className="h-10" />
 
           {isFetchingNextPage && (
             <div className="flex justify-center py-4">
