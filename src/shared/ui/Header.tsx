@@ -12,7 +12,7 @@ const Header = () => {
         className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm ring-1 ring-inset ring-primary transition-colors hover:bg-primary/10 md:px-5 md:py-3"
       >
         <span className="hidden md:inline">전체 상품 </span>
-        <span>정렬</span>
+        <span>정렬해서 보기</span>
       </Link>
     );
   } else if (pathname === "/sort" || pathname.startsWith("/product/")) {
@@ -32,7 +32,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+      <div className="lg:py-4.5 mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
         <Link
           to="/"
           className="flex flex-col items-center gap-2 text-2xl font-bold text-primary"
