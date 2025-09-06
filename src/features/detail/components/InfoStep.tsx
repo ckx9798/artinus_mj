@@ -19,7 +19,12 @@ const InfoStep = ({ product }: StepProps) => {
           />
         </div>
         <div className="flex flex-col bg-white p-6 shadow-sm lg:py-28">
-          <p className="font-medium text-primary">{product.brand}</p>
+          <div className="flex items-center justify-between">
+            <p className="font-medium text-primary">{product.brand}</p>
+            <span className="rounded-full bg-secondary px-2 text-center text-sm font-semibold lg:w-1/4">
+              {product.discountPercentage}% OFF
+            </span>
+          </div>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
             {product.title}
           </h1>
@@ -27,9 +32,6 @@ const InfoStep = ({ product }: StepProps) => {
             <p className="text-3xl font-bold tracking-tight text-neutral-900">
               ${formatPrice(product.price)}
             </p>
-            <span className="rounded-full bg-secondary px-2 py-1 text-sm font-semibold text-secondary-900">
-              {product.discountPercentage}% OFF
-            </span>
           </div>
           <p className="mt-4 text-sm text-neutral-600">
             {product.shippingInformation}

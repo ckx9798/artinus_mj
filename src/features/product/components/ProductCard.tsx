@@ -37,7 +37,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             ${formatPrice(product.price)}
           </p>
           <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <FaStar className="text-yellow-400" />
+            <FaStar className="text-secondary" />
             <span>{product.rating}</span>
           </div>
         </div>
