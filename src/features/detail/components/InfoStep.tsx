@@ -13,7 +13,7 @@ const InfoStep = ({ product }: StepProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 md:gap-8">
         <div className="overflow-hidden rounded-lg bg-white shadow-sm">
           <img
-            src={product.thumbnail}
+            src={product.images[0]}
             alt={product.title}
             className="h-full w-full object-cover object-center"
           />
