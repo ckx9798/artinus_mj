@@ -57,7 +57,7 @@ const SortControls = ({
                 <button
                   key={key}
                   onClick={() => onSortChange(key)}
-                  className={`flex w-16 items-center justify-center gap-1.5 rounded-lg px-3 py-1 text-sm transition-colors ${
+                  className={`flex w-20 items-center justify-center gap-1.5 rounded-lg px-3 py-1 text-sm transition-colors ${
                     sortConfig.key === key
                       ? "bg-primary text-white"
                       : "bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
