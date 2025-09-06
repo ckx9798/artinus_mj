@@ -1,69 +1,76 @@
-# React + TypeScript + Vite
+# 프론트엔드 지원자 김민준 - 알티너스 과제
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<br/>
 
-Currently, two official plugins are available:
+## 🎥 페이지 기능 설명
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### **상품 목록 페이지 (`/`)**
 
-## Expanding the ESLint configuration
+> 최대한 많은 상품을 빠르고 끊김 없이 탐색하는 것을 목표로 구현하였습니다.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+##### **1. 서버 데이터를 활용한 무한 스크롤 및 Prefetching**
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+단순히 페이지네이션 버튼을 누르는 방식은 사용자의 탐색 흐름을 끊고, 특히 모바일 환경에서 불편한 경험을 제공합니다. 이를 해결하기 위해 사용자가 페이지 하단에 도달했을 때 다음 페이지의 데이터를 자동으로 불러오는 무한 스크롤(Infinite Scroll)을 구현했습니다.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- **핵심 기술:** `Intersection Observer API`를 사용하여 리스트의 특정 지점이 화면에 노출되는 시점을 효율적으로 감지했습니다. `TanStack Query`의 `useInfiniteQuery` 훅과 연동하여, 이 감지 시점에 `fetchNextPage` 함수를 호출하는 방식으로 구현했습니다.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **UX 개선 (Prefetching):** 여기서 한 걸음 더 나아가, 사용자가 스크롤을 **맨 끝까지 내리기 직전에** 다음 페이지 로딩을 미리 시작하는 **프리페칭(Prefetching)** 기법을 도입했습니다. 리스트의 맨 마지막이 아닌, **마지막에서 5번째 상품**에 `Observer`를 연결하여 사용자가 미처 로딩을 인지하기 전에 백그라운드에서 다음 데이터가 준비되도록 설계했습니다.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+##### **2. 디바운싱(Debouncing)이 적용된 실시간 서버 측 검색**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+사용자는 자신이 현재 보고 있는 상품뿐만 아니라, **전체 스토어의 상품**을 대상으로 검색하기를 기대합니다. 따라서 현재까지 불러온 데이터 내에서만 필터링하는 '클라이언트 측 검색' 대신, 전체 데이터를 대상으로 하는 **'서버 측 검색'** 방식을 채택하여 검색의 정확성을 보장했습니다.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **성능 최적화 (Debouncing):** 하지만 서버 측 검색은 사용자의 키 입력마다 API를 호출하여 서버에 큰 부하를 주고, UI 깜빡임과 포커스 아웃 현상을 유발하는 문제가 있습니다. 이 문제를 해결하기 위해 `디바운싱(Debouncing)`을 적용했습니다. `useDebounce` 커스텀 훅을 통해, 사용자의 **마지막 타이핑 후 500ms가 지나면 API 요청을 딱 한 번만 보내도록** 설계했습니다.
+
+---
+
+### **상품 상세 페이지 (`/product/:id`)**
+
+> 정보를 여러 단계로 나누어 순차적으로 제공함으로써, 사용자의 인지 부하를 줄이고 구매 결정에 필요한 정보를 효과적으로 전달하는 것을 목표로 삼았습니다.
+
+##### **1. 설계 기반 아키텍처 (Configuration-Driven Architecture)**
+
+페이지의 복잡한 UI 흐름을 관리하기 위해, `설계 기반 아키텍처`를 도입했습니다.
+
+- **설계파일 (`detail.config.ts`):** 상세 페이지의 모든 단계를 정의하는 역할을 합니다. 각 단계의 순서, 제목, 그리고 렌더링할 컴포넌트를 중앙에서 관리합니다. 덕분에 새로운 단계를 추가하거나 순서를 변경하고 싶을 때, 오직 이 설정 파일 하나만 수정하게 설정하여 **유지보수성과 확장성**을 확보하였습니다.
+
+- **Step:** `InfoStep`, `ReviewsStep`, `ChartStep` 등 각 단계의 UI는 독립적인 컴포넌트로 분리했습니다.
+
+- 페이지 내에서는 단순히 인덱스를 통해 `ActiveStepComponent`를 렌더링만 담당하게 됩니다.
+
+##### **2. 데스크톱 및 모바일 네비게이션**
+
+다양한 환경의 사용자에게 최적의 탐색 경험을 제공하기 위해, 데스크톱과 모바일의 네비게이션 방식을 의도적으로 다르게 설계했습니다.
+
+- **데스크톱:** **프로그레스 바와 탭**을 통해 쉽게 이동하게 설계하였습니다.
+
+- **모바일:** : **스와이프(Swipe) 제스처**를 통한 화면 전환을 구현했습니다. `react-swipeable` 라이브러리를 사용하여 안정성을 확보했습니다.
+
+##### **3. `recharts`를 활용한 데이터 시각화**
+
+숫자로만 이루어진 데이터를 사용자가 쉽게 해석하고 상품의 가치를 직관적으로 이해할 수 있도록, `recharts` 라이브러리를 활용하여 세 가지 종류의 차트를 구현했습니다.
+
+- 리뷰/가격/할인율 변동에 관한 데이터를 통해 차트데이터를 구성하여 사용자들의 편의성과 결정에 도움이 되는 UI를 추가 설계하였습니다.
+
+---
+
+## 🔧 기술 스택 및 선택 이유 (Tech Stack & Rationale)
+
+- **Core: `React` + `TypeScript` + `Vite`**
+  - **선택 이유:** 안정적인 컴포넌트 기반 UI 라이브러리(React)에 타입 안정성(TypeScript)을 더하고, 빠른 개발 환경(Vite)을 구축하여 생산성과 코드 품질을 모두 확보했습니다.
+
+- **상태 관리: `TanStack Query (React Query)`**
+  - **선택 이유:** 서버 데이터 페칭, 캐싱, 동기화 등 복잡한 비동기 서버 상태를 선언적으로 관리하기 위해 선택했습니다. `useState`/`useEffect` 조합 대비 코드 복잡도를 획기적으로 낮추고, 무한 스크롤과 같은 고급 기능을 손쉽게 구현할 수 있었습니다.
+
+- **스타일링: `Tailwind CSS`**
+  - **선택 이유:** 유틸리티 우선 접근법을 통해 빠른 개발 속도를 확보하고, `tailwind.config.js`를 활용하여 일관된 디자인 시스템의 기반을 설계하였습니다.
+
+- **데이터 시각화: `Recharts`**
+  - **선택 이유:** React 컴포넌트 기반의 선언적인 API를 제공하여, 복잡한 데이터 시각화를 직관적이고 재사용 가능한 코드로 구현할 수 있었습니다.
+
+- **라우팅: `React Router DOM`**
+  - **선택 이유:** React 생태계의 표준 라우팅 라이브러리로, `useLocation` 등의 훅을 통해 현재 경로에 따른 동적 UI를 손쉽게 구현했습니다.
+
+- **기타 라이브러리**
+  - **`Axios`:** `baseURL` 설정 등의 기능을 갖춘 API 클라이언트로, API 요청 로직의 중앙 관리를 용이하게 했습니다.
+  - **`react-swipeable`:** 모바일 환경에서 직관적인 스와이프 제스처를 안정적으로 구현하기 위해 사용했습니다.
