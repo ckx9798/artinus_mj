@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ClipLoader } from "react-spinners";
 import MessageDisplay from "../shared/ui/MessageDisplay";
 import ProductList from "../features/product/components/ProductList";
 import SearchInput from "../shared/ui/SearchInput";
+import Spinner from "../shared/ui/Spinner";
 import { getProducts } from "../features/product/api";
 import { toast } from "react-toastify";
 import { useDebounce } from "../shared/hooks/useDebouce";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteScroll } from "../shared/hooks/useInfiniteScroll";
 
 const ProductListPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,31 +35,22 @@ const ProductListPage = () => {
     },
   });
 
-  // --- 옵저버 ---
-  const observerTargetRef = useRef<HTMLDivElement>(null);
+  const allProducts = useMemo(
+    () => data?.pages.flatMap((page) => page.products) ?? [],
+    [data],
+  );
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 },
-    );
-    const currentTarget = observerTargetRef.current;
-    if (currentTarget) observer.observe(currentTarget);
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, data]);
+  // --- 옵저버 ---
+  const { observerTargetRef } = useInfiniteScroll({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  });
 
   useEffect(() => {
     if (status === "error")
       toast.error(`데이터 로딩 중 오류: ${error.message}`);
   }, [status, error]);
-
-  const allProducts = data?.pages.flatMap((page) => page.products) ?? [];
 
   if (status === "pending" && !isFetchingNextPage) {
     return (
@@ -66,6 +59,7 @@ const ProductListPage = () => {
       </div>
     );
   }
+
   if (status === "error" && !allProducts.length) {
     return (
       <MessageDisplay
@@ -98,11 +92,7 @@ const ProductListPage = () => {
         />
       )}
 
-      {isFetchingNextPage && (
-        <div className="flex justify-center py-4">
-          <ClipLoader color="#0064FF" size={30} />
-        </div>
-      )}
+      {isFetchingNextPage && <Spinner />}
     </div>
   );
 };
