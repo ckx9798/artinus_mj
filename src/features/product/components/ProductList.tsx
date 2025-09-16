@@ -1,8 +1,7 @@
 import type { Product } from "../../../shared/api/types";
 import ProductCard from "./ProductCard";
-import React from "react";
 
-const PREFETCH_THRESHOLD = 5;
+const PREFETCH_THRESHOLD = 8;
 
 interface ProductListProps {
   products: Product[];
