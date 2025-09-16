@@ -3,9 +3,11 @@
 import { Route, Routes } from "react-router-dom";
 
 import Layout from "../../shared/ui/Layout";
-import ProductDetailPage from "../../pages/ProductDetailPage";
-import ProductListPage from "../../pages/ProductListPage";
-import ProductSortPage from "../../pages/ProductSortPage";
+import { lazy } from "react";
+
+const ProductListPage = lazy(() => import("../../pages/ProductListPage"));
+const ProductSortPage = lazy(() => import("../../pages/ProductSortPage"));
+const ProductDetailPage = lazy(() => import("../../pages/ProductDetailPage"));
 
 export const AppRouter = () => {
   return (
