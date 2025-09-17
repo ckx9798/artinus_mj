@@ -1,11 +1,15 @@
 import type { Product } from "../../../shared/api/types";
 import { formatPrice } from "../../../shared/hooks/formatPrice";
+import { toast } from "react-toastify";
 
 interface StepProps {
   product: Product;
 }
 
 const InfoStep = ({ product }: StepProps) => {
+  const handleBuy = () => {
+    toast.success("구매완료");
+  };
   return (
     <div className="space-y-12">
       {/* --- 상단 이미지 + 구매 버튼 --- */}
@@ -36,7 +40,10 @@ const InfoStep = ({ product }: StepProps) => {
             {product.shippingInformation}
           </p>
           <div className="mt-auto pt-8">
-            <button className="w-full rounded-lg bg-primary py-3 text-lg font-semibold text-white shadow-sm transition-colors hover:bg-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+            <button
+              className="w-full rounded-lg bg-primary py-3 text-lg font-semibold text-white shadow-sm transition-colors hover:bg-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+              onClick={handleBuy}
+            >
               구매하기
             </button>
           </div>
