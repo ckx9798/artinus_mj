@@ -1,12 +1,11 @@
 import type { Product } from "../../../shared/api/types";
+import { formatPrice } from "../../../shared/hooks/formatPrice";
 
 interface StepProps {
   product: Product;
 }
 
 const InfoStep = ({ product }: StepProps) => {
-  const formatPrice = (price: number) => price.toLocaleString("en-US");
-
   return (
     <div className="space-y-12">
       {/* --- 상단 이미지 + 구매 버튼 --- */}
