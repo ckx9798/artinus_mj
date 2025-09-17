@@ -13,9 +13,9 @@ const ReviewsStep = ({ product }: StepProps) => {
       </h3>
       <div className="mt-4 space-y-6">
         {product.reviews.length > 0 ? (
-          product.reviews.map((review, index) => (
+          product.reviews.map((review) => (
             <div
-              key={index}
+              key={review.comment || review.reviewerName}
               className="border-t border-neutral-200 pt-6 first:border-t-0 first:pt-0"
             >
               <div className="flex items-center justify-between">

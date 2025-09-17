@@ -4,7 +4,7 @@ import { ClipLoader } from "react-spinners";
 import { DETAIL_TABS } from "../features/detail/detail.config";
 import MessageDisplay from "../shared/ui/MessageDisplay";
 import StepTab from "../features/detail/components/StepTab";
-import { getProductById } from "../features/product/api";
+import { getProductById } from "../features/detail/api";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
