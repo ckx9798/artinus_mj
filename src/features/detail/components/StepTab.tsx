@@ -18,6 +18,17 @@ const StepTab = ({
     setCurrentStepIndex(index);
   };
 
+  const handlePrev = () => {
+    setCurrentStepIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleNext = () => {
+    setCurrentStepIndex((prev) => Math.min(prev + 1, totalSteps - 1));
+  };
+
+  const canGoPrev = currentStepIndex > 0;
+  const canGoNext = currentStepIndex < totalSteps - 1;
+
   return (
     <div className="mb-8">
       <div className="mb-4 overflow-hidden rounded-full bg-neutral-200">
@@ -33,12 +44,16 @@ const StepTab = ({
         {DETAIL_TABS.map((tab, index) => {
           const isCurrent = index === currentStepIndex;
           return (
-            <div
+            <button
               key={tab.id}
               onClick={() => handleTabClick(index)}
               className={`flex w-1/3 items-center justify-center gap-6 rounded-md p-2 transition-colors ${
                 !isCurrent ? "cursor-pointer hover:bg-neutral-200" : ""
               }`}
+              role="tab"
+              aria-selected={isCurrent}
+              aria-controls={`tabpanel-${tab.id}`}
+              disabled={isCurrent}
             >
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold transition-colors ${
@@ -54,16 +69,35 @@ const StepTab = ({
               >
                 {tab.title}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
 
       {/* --- 모바일 탭 --- */}
-      <div className="flex w-full items-center justify-center gap-12 text-sm font-semibold text-neutral-500 sm:hidden">
-        <FaArrowAltCircleLeft />
-        <span className="animate-pulse">SWIPE</span>
-        <FaArrowAltCircleRight />
+      <div className="flex w-full items-center justify-center gap-12 text-sm font-semibold sm:hidden">
+        <button
+          onClick={handlePrev}
+          disabled={!canGoPrev}
+          aria-label="이전 단계"
+        >
+          <FaArrowAltCircleLeft
+            className={`transition-colors ${canGoPrev ? "text-neutral-500" : "text-neutral-300"}`}
+          />
+        </button>
+        <span className="flex flex-col items-center text-neutral-500">
+          {DETAIL_TABS[currentStepIndex].title}
+          <span className="animate-pulse text-xs">(SWIPE)</span>
+        </span>
+        <button
+          onClick={handleNext}
+          disabled={!canGoNext}
+          aria-label="다음 단계"
+        >
+          <FaArrowAltCircleRight
+            className={`transition-colors ${canGoNext ? "text-neutral-500" : "text-neutral-300"}`}
+          />
+        </button>
       </div>
     </div>
   );
